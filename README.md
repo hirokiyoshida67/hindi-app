@@ -1,102 +1,102 @@
-# ヒンディー語学習アプリ - PERSONAL use
+# Hindi Learning App - Personal Edition
 
-> 100 文以上のフレーズと 100 単語を、Flashcard / クイズ / Gemini を使った編集機能で学習するパーソナルアプリ
+> A personal learning application for studying 100+ Hindi phrases and 100 vocabulary words using Flashcards, Quizzes, and Gemini-powered editing features.
 
-## 機能
+## Features
 
-| 機能 | 説明 |
+| Feature | Description |
 |---|---|
-| **フラッシュカード (J→H)** | 日本語を見てローマ字ヒンディー語を答える |
-| **フラッシュカード (H→J)** | ローマ字ヒンディー語を見て日本語を答える |
-| **3 択クイズ** | Gemini が動的に紛らわしい誤答を生成 |
-| **単語フラッシュカード** | 100 単語の重要語彙のみで練習 |
-| **フレーズ編集** | Gemini に提案を聞きながら内容を編集 |
-| **履歴・統計** | 累計取り組み、正答率、日別グラフ、苦手問題 |
-| **出題モード** | 1から順番／昨日やった分／正答率低い順／間違えた問題のみ／ランダム |
-| **発音音声** | Web Speech API でヒンディー語を発音（無料・ブラウザ標準） |
+| **Flashcard (Japanese→Hindi)** | View Japanese and recall romanized Hindi |
+| **Flashcard (Hindi→Japanese)** | View romanized Hindi and recall Japanese |
+| **3-Choice Quiz** | Gemini dynamically generates confusing incorrect answers |
+| **Vocabulary Flashcards** | Practice with 100 essential vocabulary words only |
+| **Phrase Editor** | Edit phrases while getting Gemini suggestions |
+| **History & Statistics** | Total attempts, accuracy rate, daily graphs, weak areas |
+| **Quiz Modes** | Sequential / Yesterday's problems / Lowest accuracy / Mistakes only / Random |
+| **Pronunciation Audio** | Hindi pronunciation via Web Speech API (free, browser-native) |
 
-## セットアップ
+## Setup
 
-### 1. 必要なもの
+### 1. Requirements
 
-- **Node.js** (v18 以上)
-- **npm** (Node.js に同梱)
-- **Gemini API キー** ([Google AI Studio](https://aistudio.google.com/app/apikey) で無料取得可)
-- モダンブラウザ（Chrome / Edge / Safari 推奨。ヒンディー音声合成が利用可能）
+- **Node.js** (v18 or higher)
+- **npm** (bundled with Node.js)
+- **Gemini API Key** (free from [Google AI Studio](https://aistudio.google.com/app/apikey))
+- Modern browser (Chrome / Edge / Safari recommended for Hindi speech synthesis)
 
-### 2. プロジェクト展開と依存関係インストール
+### 2. Project Setup and Install Dependencies
 
 ```bash
-# ZIP を展開後、フォルダに移動
+# Navigate to the project folder
 cd hindi-app
 
-# 依存関係をインストール
+# Install dependencies
 npm install
 ```
 
-### 3. Gemini API キーを設定
+### 3. Configure Gemini API Key
 
 ```bash
-# .env.example を .env にコピー
+# Copy .env.example to .env
 cp .env.example .env
 
-# .env を編集して API キーを記入
-# VITE_GEMINI_API_KEY=ここに実際のキーを貼り付け
+# Edit .env and paste your API key
+# VITE_GEMINI_API_KEY=your_actual_key_here
 ```
 
-VS Code で `.env` を開き、`your_gemini_api_key_here` の部分を実際のキーに置き換えてください。
+Open `.env` in VS Code and replace the placeholder with your actual API key.
 
-### 4. 開発サーバー起動
+### 4. Start Development Server
 
 ```bash
 npm run dev
 ```
 
-ブラウザが自動で `http://localhost:5173` を開きます。
+Your browser will automatically open `http://localhost:5173`.
 
-### 5. 本番ビルド（オプション）
+### 5. Production Build (Optional)
 
 ```bash
-npm run build      # dist/ 以下に静的ファイルが生成される
-npm run preview    # 生成物をローカルで確認
+npm run build      # Static files generated in dist/
+npm run preview    # Preview the production build locally
 ```
 
-## データの保管
+## Data Storage
 
-すべての記録（取り組み履歴、編集内容）は **ブラウザの localStorage に保存** されます：
+All records (study history, edits) are stored in **browser localStorage**:
 
-- `hindi-app:attempts` — 取り組み履歴
-- `hindi-app:overrides` — フレーズの編集差分
-- `hindi-app:vocab-overrides` — 単語の編集差分
+- `hindi-app:attempts` — Study history
+- `hindi-app:overrides` — Phrase edits
+- `hindi-app:vocab-overrides` — Vocabulary edits
 
-**注意**: localStorage はブラウザごとに別データです。Chrome で学習した記録は Safari からは見えません。
+**Note**: localStorage is separate per browser. Data studied in Chrome won't appear in Safari.
 
-### 別端末で使うには
+### Using on Another Device
 
-履歴画面の「データをエクスポート」で JSON をダウンロードし、別端末で「データをインポート」してください。
+Export data as JSON from the History screen, then import it on another device.
 
-## ファイル構成
+## Project Structure
 
 ```
 hindi-app/
-├── .env.example              # API キーのテンプレート
+├── .env.example              # API key template
 ├── package.json
 ├── vite.config.js
 ├── tailwind.config.js
 ├── postcss.config.js
 ├── index.html
 ├── src/
-│   ├── main.jsx              # React エントリ
-│   ├── App.jsx               # メイン (画面ルーティング)
-│   ├── index.css             # Tailwind + グローバルスタイル
+│   ├── main.jsx              # React entry point
+│   ├── App.jsx               # Main component (screen routing)
+│   ├── index.css             # Tailwind + global styles
 │   ├── data/
-│   │   ├── phrases.js        # 102 フレーズ (v3 由来)
-│   │   └── vocabulary.js     # 100 単語
+│   │   ├── phrases.js        # 102 phrases
+│   │   └── vocabulary.js     # 100 vocabulary words
 │   ├── lib/
-│   │   ├── storage.js        # localStorage ラッパー
-│   │   ├── gemini.js         # Gemini API クライアント
+│   │   ├── storage.js        # localStorage wrapper
+│   │   ├── gemini.js         # Gemini API client
 │   │   ├── tts.js            # Web Speech API
-│   │   └── studyEngine.js    # 問題選択ロジック
+│   │   └── studyEngine.js    # Quiz selection logic
 │   ├── screens/
 │   │   ├── HomeScreen.jsx
 │   │   ├── FlashcardScreen.jsx
@@ -109,64 +109,64 @@ hindi-app/
 └── README.md
 ```
 
-## カスタマイズ・拡張のヒント
+## Customization & Extension
 
-### フレーズを編集したい
+### Editing Phrases
 
-- **App 内で編集**: 「フレーズ編集」画面で内容を直接編集できます（保存先は localStorage）。Gemini に提案も聞けます
-- **永続的に編集（コードレベル）**: `src/data/phrases.js` を直接編集してください
+- **In-app editing**: Use the "Phrase Editor" screen to edit directly (stored in localStorage). You can ask Gemini for suggestions.
+- **Code-level edits**: Edit `src/data/phrases.js` directly for permanent changes.
 
-### 新しい単語を追加したい
+### Adding New Vocabulary
 
-`src/data/vocabulary.js` の配列に項目を追加してください：
+Add entries to the array in `src/data/vocabulary.js`:
 
 ```js
 {
   id: 'v101',
-  romanized: 'naya_word',
+  romanized: 'new_word',
   devanagari: 'नया शब्द',
-  japanese: '新しい単語',
-  notes: '補足',
-  category: 'カテゴリ名'
+  japanese: 'new word',
+  notes: 'Additional notes',
+  category: 'Category Name'
 }
 ```
 
-### 発音音声を改善したい
+### Improving Pronunciation Audio
 
-現在は Web Speech API（ブラウザ標準）を使用。より高品質な音声が欲しい場合：
+Currently using Web Speech API (browser-native). For higher quality:
 
-1. **Google Cloud TTS** — `src/lib/tts.js` を Cloud TTS API 呼び出しに置き換え
-2. **ElevenLabs** — 同様に置き換え、声を選択可能
-3. **事前録音** — `public/audio/{id}.mp3` を配置し、`<audio>` で再生
+1. **Google Cloud TTS** — Replace `src/lib/tts.js` with Cloud TTS API calls
+2. **ElevenLabs** — Similar replacement with voice selection
+3. **Pre-recorded audio** — Add `public/audio/{id}.mp3` files and use `<audio>` element
 
-## トラブルシューティング
+## Troubleshooting
 
-### ヒンディー語音声が再生されない
+### Hindi Audio Not Playing
 
-- お使いのブラウザに hi-IN 音声がインストールされていない可能性があります
-- **Windows**: 設定 → 時刻と言語 → 言語と地域 → ヒンディー語の音声をダウンロード
-- **macOS**: システム環境設定 → アクセシビリティ → 読み上げコンテンツ → システムボイス → カスタマイズ → ヒンディー語をダウンロード
-- Chrome 系ブラウザは Google のクラウド音声を使うため、ほぼ確実に再生できます
+- Your browser may not have Hindi (hi-IN) voice installed.
+- **Windows**: Settings → Time & Language → Language & region → Download Hindi voice
+- **macOS**: System Settings → Accessibility → Spoken Content → System Voice → Customize → Download Hindi
+- Chrome-based browsers use Google's cloud voices, so audio should work reliably.
 
-### Gemini API がエラーになる
+### Gemini API Error
 
-- `.env` の `VITE_GEMINI_API_KEY` が正しいか確認
-- 開発サーバーを `Ctrl+C` で停止 → `npm run dev` で再起動（.env の変更は再起動が必要）
-- API キーが [aistudio.google.com](https://aistudio.google.com/app/apikey) で有効か確認
+- Verify `VITE_GEMINI_API_KEY` in `.env` is correct
+- Stop dev server (`Ctrl+C`) and restart (`npm run dev`) — changes to `.env` require restart
+- Confirm API key is valid at [aistudio.google.com](https://aistudio.google.com/app/apikey)
 
-### 「該当する問題がありません」と出る
+### "No Questions Available"
 
-「昨日やった問題のみ」や「間違えた問題のみ」を選んだ際、該当データがない場合に表示されます。出題モードを「1 から順番に」に変えてください。
+This appears when selecting "Yesterday's problems only" or "Mistakes only" with no matching data. Switch to "Sequential" quiz mode.
 
-## バージョン
+## Version
 
-- v0.1 — 初期プロトタイプ。102 フレーズ + 100 単語
-- データ元: `hindi_phrases_v3.md`
+- v0.1 — Initial prototype. 102 phrases + 100 vocabulary words
+- Data source: `hindi_phrases_v3.md`
 
-## 今後の拡張アイデア
+## Future Enhancement Ideas
 
-- [ ] 復習スケジューラ（Spaced Repetition / Anki 風）
-- [ ] 録音モード（自分の発音を録音して比較）
-- [ ] テキスト→画像（フレーズに合った場面のイメージ生成）
-- [ ] グループ学習機能（チームでスコア共有）
-- [ ] モバイル PWA 対応
+- [ ] Spaced repetition scheduler (Anki-like)
+- [ ] Recording mode (compare your pronunciation)
+- [ ] Text-to-image (generate relevant images for phrases)
+- [ ] Group learning (share scores with teammates)
+- [ ] Mobile PWA support
