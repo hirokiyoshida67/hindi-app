@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(npx vite *)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(npm audit *)",
+      "Bash(python3 -c ' *)"
     ]
   }
 }

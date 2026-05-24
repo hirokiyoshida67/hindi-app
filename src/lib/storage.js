@@ -314,6 +314,113 @@ export function exportAllData() {
   };
 }
 
+// Validate an imported data object. Returns { data, issues }.
+// - data: sanitized object containing only well-formed top-level sections
+// - issues: array of human-readable strings describing skipped/dropped entries
+// Throws Error if the top-level shape is fundamentally wrong (not an object, or
+// a required section has the wrong outer type).
+export function validateImportData(input) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    throw new Error('File is not a valid JSON object');
+  }
+
+  const out = {};
+  const issues = [];
+  const isPlainObject = (v) =>
+    v !== null && typeof v === 'object' && !Array.isArray(v);
+  const isSafeKey = (k) =>
+    k !== '__proto__' && k !== 'constructor' && k !== 'prototype';
+
+  // attempts: array of attempt records
+  if ('attempts' in input) {
+    if (!Array.isArray(input.attempts)) {
+      throw new Error('"attempts" must be an array');
+    }
+    let dropped = 0;
+    out.attempts = input.attempts.filter((a) => {
+      const ok =
+        a &&
+        typeof a === 'object' &&
+        !Array.isArray(a) &&
+        typeof a.itemId === 'string' &&
+        typeof a.itemType === 'string' &&
+        typeof a.mode === 'string' &&
+        typeof a.correct === 'boolean' &&
+        typeof a.timestamp === 'number' &&
+        Number.isFinite(a.timestamp);
+      if (!ok) dropped += 1;
+      return ok;
+    });
+    if (dropped > 0) issues.push(`${dropped} malformed attempt record(s) skipped`);
+  }
+
+  // overrides / vocabOverrides: object whose values are field objects
+  for (const key of ['overrides', 'vocabOverrides']) {
+    if (key in input) {
+      if (!isPlainObject(input[key])) {
+        throw new Error(`"${key}" must be an object`);
+      }
+      const cleaned = {};
+      let dropped = 0;
+      for (const [id, fields] of Object.entries(input[key])) {
+        if (!isSafeKey(id)) { dropped += 1; continue; }
+        if (isPlainObject(fields)) cleaned[id] = fields;
+        else dropped += 1;
+      }
+      out[key] = cleaned;
+      if (dropped > 0) issues.push(`${dropped} malformed ${key} entry(ies) skipped`);
+    }
+  }
+
+  // cachedDistractors: object whose values are arrays of strings
+  if ('cachedDistractors' in input) {
+    if (!isPlainObject(input.cachedDistractors)) {
+      throw new Error('"cachedDistractors" must be an object');
+    }
+    const cleaned = {};
+    let dropped = 0;
+    for (const [id, options] of Object.entries(input.cachedDistractors)) {
+      if (!isSafeKey(id)) { dropped += 1; continue; }
+      if (Array.isArray(options) && options.every((o) => typeof o === 'string')) {
+        cleaned[id] = options;
+      } else {
+        dropped += 1;
+      }
+    }
+    out.cachedDistractors = cleaned;
+    if (dropped > 0) issues.push(`${dropped} malformed distractor entry(ies) skipped`);
+  }
+
+  // trivia: array of trivia question objects
+  if ('trivia' in input) {
+    if (!Array.isArray(input.trivia)) {
+      throw new Error('"trivia" must be an array');
+    }
+    let dropped = 0;
+    out.trivia = input.trivia.filter((t) => {
+      const ok =
+        t &&
+        typeof t === 'object' &&
+        !Array.isArray(t) &&
+        typeof t.id === 'string' &&
+        typeof t.question === 'string' &&
+        Array.isArray(t.choices) &&
+        t.choices.length >= 2 &&
+        t.choices.every((c) => typeof c === 'string') &&
+        Number.isInteger(t.correctIndex) &&
+        t.correctIndex >= 0 &&
+        t.correctIndex < t.choices.length &&
+        (t.explanation === undefined || typeof t.explanation === 'string') &&
+        (t.image === undefined || typeof t.image === 'string');
+      if (!ok) dropped += 1;
+      return ok;
+    });
+    if (dropped > 0) issues.push(`${dropped} malformed trivia question(s) skipped`);
+  }
+
+  return { data: out, issues };
+}
+
 export function importAllData(data) {
   try {
     if (data.attempts) {

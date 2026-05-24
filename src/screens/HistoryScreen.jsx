@@ -9,6 +9,7 @@ import {
   clearAttempts,
   exportAllData,
   importAllData,
+  validateImportData,
   getTrivia,
 } from '../lib/storage.js';
 import { getOverallStats } from '../lib/studyEngine.js';
@@ -54,12 +55,41 @@ export default function HistoryScreen({ onExit }) {
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        const data = JSON.parse(reader.result);
+        const parsed = JSON.parse(reader.result);
+        const { data, issues } = validateImportData(parsed);
+
+        const counts = [
+          data.attempts !== undefined && `${data.attempts.length} attempts`,
+          data.overrides !== undefined && `${Object.keys(data.overrides).length} phrase edits`,
+          data.vocabOverrides !== undefined && `${Object.keys(data.vocabOverrides).length} vocab edits`,
+          data.cachedDistractors !== undefined && `${Object.keys(data.cachedDistractors).length} cached distractor sets`,
+          data.trivia !== undefined && `${data.trivia.length} trivia question(s)`,
+        ].filter(Boolean);
+
+        if (counts.length === 0) {
+          alert('No importable data found in the file.');
+          // reset the input so selecting the same file again triggers onChange
+          e.target.value = '';
+          return;
+        }
+
+        let msg = `About to import:\n  ${counts.join('\n  ')}`;
+        if (issues.length > 0) {
+          msg += `\n\nValidation issues:\n  ${issues.join('\n  ')}`;
+        }
+        msg += '\n\nThis will OVERWRITE current data. Proceed?';
+
+        if (!confirm(msg)) {
+          e.target.value = '';
+          return;
+        }
+
         importAllData(data);
         alert('Data imported. Reloading...');
         window.location.reload();
       } catch (err) {
         alert('Import error: ' + err.message);
+        e.target.value = '';
       }
     };
     reader.readAsText(file);
