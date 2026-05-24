@@ -7,7 +7,7 @@ import ExplanationPanel from '../components/ExplanationPanel.jsx';
 
 export default function FlashcardScreen({ direction, onExit }) {
   // direction: 'j2h' (Japanese → Hindi) or 'h2j' (Hindi → Japanese)
-  const allPhrases = useMemo(() => applyOverrides(rawPhrases), []);
+  const allPhrases = useMemo(() => applyOverrides(rawPhrases), [rawPhrases]);
 
   const [studyMode, setStudyMode] = useState('sequential');
   const [categoryFilter, setCategoryFilter] = useState('all');

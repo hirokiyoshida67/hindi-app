@@ -152,6 +152,9 @@ function QuizQuestion({ phrase, allPhrases, useAI, onAnswered, onNext }) {
         } else {
           // Random selection from other phrases
           const others = allPhrases.filter(p => p.id !== phrase.id);
+          if (others.length < 2) {
+            throw new Error('Not enough phrases to generate distractors. Add more phrases or use Gemini AI.');
+          }
           const shuffled = others.sort(() => Math.random() - 0.5);
           distractors = [shuffled[0].romanized, shuffled[1].romanized];
         }

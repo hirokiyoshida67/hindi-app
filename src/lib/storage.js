@@ -13,19 +13,33 @@ const TRIVIA_KEY = 'hindi-app:trivia';
 // --- Attempts ---
 
 export function recordAttempt({ itemId, itemType, mode, direction, correct }) {
-  const attempts = getAttempts();
-  const record = {
-    itemId,           // e.g. "27" or "v15"
-    itemType,         // 'phrase' | 'vocab'
-    mode,             // 'flashcard' | 'quiz'
-    direction,        // 'j2h' | 'h2j'
-    correct,          // bool (for flashcard: self-marked; for quiz: actual)
-    timestamp: Date.now(),
-    date: new Date().toISOString().slice(0, 10), // YYYY-MM-DD
-  };
-  attempts.push(record);
-  localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(attempts));
-  return record;
+  // Validate inputs
+  if (!itemId || !itemType || !mode) {
+    console.warn('recordAttempt: missing required fields', { itemId, itemType, mode });
+    return null;
+  }
+
+  try {
+    const attempts = getAttempts();
+    const record = {
+      itemId,           // e.g. "27" or "v15"
+      itemType,         // 'phrase' | 'vocab'
+      mode,             // 'flashcard' | 'quiz'
+      direction,        // 'j2h' | 'h2j'
+      correct,          // bool (for flashcard: self-marked; for quiz: actual)
+      timestamp: Date.now(),
+      date: new Date().toISOString().slice(0, 10), // YYYY-MM-DD
+    };
+    attempts.push(record);
+    localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(attempts));
+    return record;
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.name === 'SecurityError') {
+      console.warn('Storage unavailable (quota exceeded or private mode):', e.message);
+      return null;
+    }
+    throw e;
+  }
 }
 
 export function getAttempts() {
@@ -93,15 +107,31 @@ export function getOverrides() {
 }
 
 export function setOverride(id, fields) {
-  const all = getOverrides();
-  all[id] = { ...(all[id] || {}), ...fields };
-  localStorage.setItem(OVERRIDES_KEY, JSON.stringify(all));
+  try {
+    const all = getOverrides();
+    all[id] = { ...(all[id] || {}), ...fields };
+    localStorage.setItem(OVERRIDES_KEY, JSON.stringify(all));
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.name === 'SecurityError') {
+      console.warn('Storage unavailable:', e.message);
+      return;
+    }
+    throw e;
+  }
 }
 
 export function clearOverride(id) {
-  const all = getOverrides();
-  delete all[id];
-  localStorage.setItem(OVERRIDES_KEY, JSON.stringify(all));
+  try {
+    const all = getOverrides();
+    delete all[id];
+    localStorage.setItem(OVERRIDES_KEY, JSON.stringify(all));
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.name === 'SecurityError') {
+      console.warn('Storage unavailable:', e.message);
+      return;
+    }
+    throw e;
+  }
 }
 
 export function applyOverrides(phrases) {
@@ -122,9 +152,17 @@ export function getVocabOverrides() {
 }
 
 export function setVocabOverride(id, fields) {
-  const all = getVocabOverrides();
-  all[id] = { ...(all[id] || {}), ...fields };
-  localStorage.setItem(VOCAB_OVERRIDES_KEY, JSON.stringify(all));
+  try {
+    const all = getVocabOverrides();
+    all[id] = { ...(all[id] || {}), ...fields };
+    localStorage.setItem(VOCAB_OVERRIDES_KEY, JSON.stringify(all));
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.name === 'SecurityError') {
+      console.warn('Storage unavailable:', e.message);
+      return;
+    }
+    throw e;
+  }
 }
 
 export function applyVocabOverrides(vocab) {
@@ -147,15 +185,31 @@ export function getCachedDistractors() {
 }
 
 export function setCachedDistractors(phraseId, options) {
-  const all = getCachedDistractors();
-  all[phraseId] = options;
-  localStorage.setItem(DISTRACTORS_KEY, JSON.stringify(all));
+  try {
+    const all = getCachedDistractors();
+    all[phraseId] = options;
+    localStorage.setItem(DISTRACTORS_KEY, JSON.stringify(all));
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.name === 'SecurityError') {
+      console.warn('Storage unavailable:', e.message);
+      return;
+    }
+    throw e;
+  }
 }
 
 export function setCachedDistractorsBulk(map) {
-  const all = getCachedDistractors();
-  Object.assign(all, map);
-  localStorage.setItem(DISTRACTORS_KEY, JSON.stringify(all));
+  try {
+    const all = getCachedDistractors();
+    Object.assign(all, map);
+    localStorage.setItem(DISTRACTORS_KEY, JSON.stringify(all));
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.name === 'SecurityError') {
+      console.warn('Storage unavailable:', e.message);
+      return;
+    }
+    throw e;
+  }
 }
 
 export function clearCachedDistractors() {
@@ -175,44 +229,76 @@ export function getTrivia() {
 }
 
 export function addTrivia({ question, choices, correctIndex, explanation = '' }) {
-  const items = getTrivia();
-  const id = `t${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-  const item = { id, question, choices, correctIndex, explanation, createdAt: Date.now() };
-  items.push(item);
-  localStorage.setItem(TRIVIA_KEY, JSON.stringify(items));
-  return item;
+  try {
+    const items = getTrivia();
+    const id = `t${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const item = { id, question, choices, correctIndex, explanation, createdAt: Date.now() };
+    items.push(item);
+    localStorage.setItem(TRIVIA_KEY, JSON.stringify(items));
+    return item;
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.name === 'SecurityError') {
+      console.warn('Storage unavailable:', e.message);
+      return null;
+    }
+    throw e;
+  }
 }
 
 export function updateTrivia(id, fields) {
-  const items = getTrivia();
-  const idx = items.findIndex((t) => t.id === id);
-  if (idx === -1) return null;
-  items[idx] = { ...items[idx], ...fields };
-  localStorage.setItem(TRIVIA_KEY, JSON.stringify(items));
-  return items[idx];
+  try {
+    const items = getTrivia();
+    const idx = items.findIndex((t) => t.id === id);
+    if (idx === -1) return null;
+    items[idx] = { ...items[idx], ...fields };
+    localStorage.setItem(TRIVIA_KEY, JSON.stringify(items));
+    return items[idx];
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.name === 'SecurityError') {
+      console.warn('Storage unavailable:', e.message);
+      return null;
+    }
+    throw e;
+  }
 }
 
 export function deleteTrivia(id) {
-  const items = getTrivia().filter((t) => t.id !== id);
-  localStorage.setItem(TRIVIA_KEY, JSON.stringify(items));
+  try {
+    const items = getTrivia().filter((t) => t.id !== id);
+    localStorage.setItem(TRIVIA_KEY, JSON.stringify(items));
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.name === 'SecurityError') {
+      console.warn('Storage unavailable:', e.message);
+      return;
+    }
+    throw e;
+  }
 }
 
 // One-time seed: writes the given trivia array to localStorage if the
 // flag has never been set. The user owns the store afterwards — deleting
 // items will not cause them to reappear, even if the seed is called again.
 export function seedTriviaOnce(seedItems, flagKey) {
-  if (localStorage.getItem(flagKey)) return false;
-  const existing = getTrivia();
-  const baseTs = Date.now();
-  const newItems = seedItems.map((s, i) => ({
-    id: `seed-${flagKey}-${i}`,
-    createdAt: baseTs + i,
-    explanation: '',
-    ...s,
-  }));
-  localStorage.setItem(TRIVIA_KEY, JSON.stringify([...existing, ...newItems]));
-  localStorage.setItem(flagKey, '1');
-  return true;
+  try {
+    if (localStorage.getItem(flagKey)) return false;
+    const existing = getTrivia();
+    const baseTs = Date.now();
+    const newItems = seedItems.map((s, i) => ({
+      id: `seed-${flagKey}-${i}`,
+      createdAt: baseTs + i,
+      explanation: '',
+      ...s,
+    }));
+    localStorage.setItem(TRIVIA_KEY, JSON.stringify([...existing, ...newItems]));
+    localStorage.setItem(flagKey, '1');
+    return true;
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.name === 'SecurityError') {
+      console.warn('Storage unavailable:', e.message);
+      return false;
+    }
+    throw e;
+  }
 }
 
 // --- Export / Import ---
@@ -229,19 +315,27 @@ export function exportAllData() {
 }
 
 export function importAllData(data) {
-  if (data.attempts) {
-    localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(data.attempts));
-  }
-  if (data.overrides) {
-    localStorage.setItem(OVERRIDES_KEY, JSON.stringify(data.overrides));
-  }
-  if (data.vocabOverrides) {
-    localStorage.setItem(VOCAB_OVERRIDES_KEY, JSON.stringify(data.vocabOverrides));
-  }
-  if (data.cachedDistractors) {
-    localStorage.setItem(DISTRACTORS_KEY, JSON.stringify(data.cachedDistractors));
-  }
-  if (data.trivia) {
-    localStorage.setItem(TRIVIA_KEY, JSON.stringify(data.trivia));
+  try {
+    if (data.attempts) {
+      localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(data.attempts));
+    }
+    if (data.overrides) {
+      localStorage.setItem(OVERRIDES_KEY, JSON.stringify(data.overrides));
+    }
+    if (data.vocabOverrides) {
+      localStorage.setItem(VOCAB_OVERRIDES_KEY, JSON.stringify(data.vocabOverrides));
+    }
+    if (data.cachedDistractors) {
+      localStorage.setItem(DISTRACTORS_KEY, JSON.stringify(data.cachedDistractors));
+    }
+    if (data.trivia) {
+      localStorage.setItem(TRIVIA_KEY, JSON.stringify(data.trivia));
+    }
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.name === 'SecurityError') {
+      console.warn('Storage import failed - storage unavailable:', e.message);
+      throw new Error('Could not import data: Storage is unavailable');
+    }
+    throw e;
   }
 }
