@@ -1,0 +1,5 @@
+#!/bin/sh
+if git diff --cached --name-only | grep -E '(^|/)(\.env|\.env\.local)$' >/dev/null; then
+  echo "ERROR: .env または .env.local がコミットに含まれています。削除してください。"
+  exit 1
+fi

@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Source Sans 3', system-ui, sans-serif;
+    background-color: #fbf8f3;
+    color: #1a1f2e;
+  }
+  body {
+    min-height: 100vh;
+    background-image:
+      radial-gradient(at 0% 0%, rgba(232, 132, 58, 0.05) 0%, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(74, 90, 138, 0.05) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+  h1, h2, h3 {
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: -0.01em;
+  }
+  /* Devanagari text auto-detects via Unicode block */
+  .devanagari, [lang="hi"] {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-5 py-2.5 rounded-md bg-ink-900 text-paper-50
+      hover:bg-ink-800 transition-colors font-medium text-sm
+      shadow-sm hover:shadow disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply px-5 py-2.5 rounded-md bg-paper-100 text-ink-900
+      hover:bg-paper-200 transition-colors font-medium text-sm border border-paper-200;
+  }
+  .btn-accent {
+    @apply px-5 py-2.5 rounded-md bg-saffron-500 text-white
+      hover:bg-saffron-600 transition-colors font-medium text-sm shadow-sm;
+  }
+  .btn-ghost {
+    @apply px-3 py-1.5 rounded text-ink-700 hover:bg-paper-100 text-sm;
+  }
+  .card {
+    @apply bg-white border border-paper-200 rounded-lg shadow-sm;
+  }
+  .label {
+    @apply text-xs uppercase tracking-wider text-ink-700/60 font-medium;
+  }
+  .input {
+    @apply w-full px-3 py-2 border border-paper-200 rounded-md
+      bg-paper-50 focus:bg-white focus:outline-none focus:ring-2
+      focus:ring-saffron-400/40 text-sm;
+  }
+  .textarea {
+    @apply input min-h-[8rem] font-mono text-xs leading-relaxed;
+  }
+}
+
+/* Subtle fade animation for cards */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
